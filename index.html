@@ -503,7 +503,7 @@ function highlightMapByPersona(persona){
 /* ---------------- 구글 시트 제출 설정 ---------------- */
 // 아래 따옴표 안에 Apps Script 배포 후 받은 '웹 앱 URL'을 붙여넣으세요.
 // 예: 'https://script.google.com/macros/s/AKfycbx.../exec'
-const GOOGLE_SHEET_SCRIPT_URL = '';
+const GOOGLE_SHEET_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwtEEPhC48VGIjZNlnWEfj2b067A4LsVgmWelxGVTwlLOxHx2cgXGh8ZwdKyCJjRB6-yQ/exec';
 // 교사 모드 접속 비밀번호. 원하는 값으로 바꿔서 사용하세요. (완전한 보안 장치는 아니며, 학생 오클릭 방지용입니다)
 const TEACHER_PASSWORD = '1234';
 
@@ -903,7 +903,7 @@ function startJourney(personaId){
     document.getElementById('submitDiaryBtn').onclick = submitDiary;
 
     function submitDiary(){
-      const GOOGLE_SHEET_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmxc_-c22PVWKcbv5u6DaGy-kBBfEWxtc4CJRlBt3LJy1DwVoPpNVj_CQbD0MQ4CldcA/exec';
+      const GOOGLE_SHEET_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwtEEPhC48VGIjZNlnWEfj2b067A4LsVgmWelxGVTwlLOxHx2cgXGh8ZwdKyCJjRB6-yQ/exec';
       const num = document.getElementById('studentNumber').value.trim();
       const name = document.getElementById('studentName').value.trim();
       const group = document.getElementById('studentGroup').value;
@@ -1009,7 +1009,7 @@ function closeDashboard() {
 }
 
 function loadFeedbacks() {
-  const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZ6gQjsKZiXVnnv2941NzIZRb11WKLAS3tbhdLstAVRHeD-N6552CcoY5fB5fjneSm4w/exec";
+  const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtEEPhC48VGIjZNlnWEfj2b067A4LsVgmWelxGVTwlLOxHx2cgXGh8ZwdKyCJjRB6-yQ/exec";
   const container = document.getElementById('feedbackList');
 
   if (!container) return;
