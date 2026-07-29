@@ -943,24 +943,30 @@ function startJourney(personaId){
     disclaimer.textContent = '이 내용은 증언록을 기반으로 가상의 상황으로 재구성한 것입니다.';
     app.appendChild(disclaimer);
 
+   const btnGroup = document.createElement('div');
+    btnGroup.style.display = 'flex';
+    btnGroup.style.justifyContent = 'center';
+    btnGroup.style.gap = '10px';
+    btnGroup.style.marginTop = '1.5rem';
+
     const backBtn = document.createElement('button');
     backBtn.className = 'next-btn';
-    backBtn.style.marginTop = '1.5rem';
     backBtn.textContent = '다른 인물의 여정 살펴보기';
     backBtn.onclick = switchToPersonaView;
-    app.appendChild(backBtn);
-    
+
     const dashboardBtn = document.createElement('a');
-dashboardBtn.className = 'next-btn'; // 기존 버튼과 동일한 디자인 적용
-dashboardBtn.style.marginTop = '1.5rem';
-dashboardBtn.style.marginLeft = '10px'; // 버튼 사이 간격
-dashboardBtn.style.display = 'inline-block';
-dashboardBtn.style.textDecoration = 'none';
-dashboardBtn.style.textAlign = 'center';
-dashboardBtn.textContent = '📊 모둠별 소감문 대시보드';
-dashboardBtn.href = 'https://docs.google.com/spreadsheets/d/1zFSIHfV8GaCXAuMVa4HBRMrYCXPgRB8qPoc0-qJ2ZIM/edit?usp=sharing'; // 연결할 주소
-dashboardBtn.target = '_blank'; // 새 탭에서 열기
-app.appendChild(dashboardBtn);
+    dashboardBtn.className = 'next-btn';
+    dashboardBtn.style.display = 'inline-flex';
+    dashboardBtn.style.alignItems = 'center';
+    dashboardBtn.style.justifyContent = 'center';
+    dashboardBtn.style.textDecoration = 'none';
+    dashboardBtn.textContent = '📊 소감문 대시보드';
+    dashboardBtn.href = 'https://docs.google.com/spreadsheets/d/1zFSIHfV8GaCXAuMVa4HBRMrYCXPgRB8qPoc0-qJ2ZIM/edit?usp=sharing';
+    dashboardBtn.target = '_blank';
+
+    btnGroup.appendChild(backBtn);
+    btnGroup.appendChild(dashboardBtn);
+    app.appendChild(btnGroup);
   }
 }
 
