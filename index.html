@@ -985,20 +985,40 @@ renderCards();
 
 /* ------------- 소감문 대시보드 모달 구현 ------------- */
 
-// 1. 모달 HTML 동적 생성
+// 1. 모달 HTML 동적 생성 (상단 필터 드롭다운 추가)
 const modalHtml = `
   <div id="dashboardModal" style="display:none; position:fixed; z-index:10000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
-    <div style="background:#fff; margin:5% auto; padding:24px; border-radius:10px; width:90%; max-width:600px; max-height:80vh; overflow-y:auto; position:relative; box-sizing:border-box;">
-      <span onclick="closeDashboard()" style="position:absolute; right:20px; top:15px; font-size:24px; font-weight:bold; cursor:pointer; color:#aaa;">&times;</span>
-      <h3 style="margin-top:0; color:#004f8b;">소감문 대시보드</h3>
-      <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
+    <div style="background:#fff; margin:4% auto; padding:24px; border-radius:12px; width:90%; max-width:800px; max-height:85vh; overflow-y:auto; position:relative; box-sizing:border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+      
+      <!-- 닫기 버튼 -->
+      <span onclick="closeDashboard()" style="position:absolute; right:20px; top:15px; font-size:28px; font-weight:bold; cursor:pointer; color:#aaa;">&times;</span>
+      
+      <!-- 헤더 & 필터 구역 -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px; padding-right:30px;">
+        <h3 style="margin:0; color:#004f8b; font-size:1.4rem;">소감문 대시보드</h3>
+        
+        <!-- 모둠 선택 드롭다운 -->
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label for="groupFilterSelect" style="font-size:14px; font-weight:bold; color:#555;">모둠 필터:</label>
+          <select id="groupFilterSelect" onchange="filterFeedbacks()" style="padding:6px 12px; border-radius:6px; border:1px solid #ccc; font-size:14px; cursor:pointer;">
+            <option value="all">전체 보기</option>
+          </select>
+        </div>
+      </div>
+      
+      <hr style="border:0; border-top:1px solid #eee; margin-bottom:20px;">
+      
+      <!-- 카드 리스트 출력 구역 -->
       <div id="feedbackList"><p style="text-align:center; color:#888;">데이터를 불러오는 중입니다...</p></div>
     </div>
   </div>
 `;
 document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-// 2. 모달 열기 / 닫기 / 데이터 로드 함수
+// 전역 데이터 저장용 변수
+let allFeedbacksData = [];
+
+// 2. 모달 열기 / 닫기
 function openDashboard() {
   document.getElementById('dashboardModal').style.display = 'block';
   loadFeedbacks();
@@ -1008,90 +1028,139 @@ function closeDashboard() {
   document.getElementById('dashboardModal').style.display = 'none';
 }
 
+// 3. 소감문 데이터 불러오기
 function loadFeedbacks() {
-  const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtEEPhC48VGIjZNlnWEfj2b067A4LsVgmWelxGVTwlLOxHx2cgXGh8ZwdKyCJjRB6-yQ/exec";
+  const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZ6gQjsKZiXVnnv2941NzIZRb11WKLAS3tbhdLstAVRHeD-N6552CcoY5fB5fjneSm4w/exec";
   const container = document.getElementById('feedbackList');
 
   if (!container) return;
 
-  if (GOOGLE_APP_SCRIPT_URL.includes("여기에_구글")) {
-    container.innerHTML = '<p style="text-align:center; color:#e67e22; width:100%;">⚠️ 스크립트에 구글 앱스 스크립트 URL을 입력해 주세요.</p>';
-    return;
-  }
-
-  // 로딩 메시지
   container.innerHTML = '<p style="text-align:center; color:#888; width:100%; grid-column: 1 / -1;">⏳ 소감문을 불러오는 중입니다...</p>';
 
   fetch(GOOGLE_APP_SCRIPT_URL)
     .then(res => res.json())
     .then(data => {
-      container.innerHTML = '';
+      allFeedbacksData = data || [];
       
-      if (!data || data.length === 0) {
+      if (allFeedbacksData.length === 0) {
         container.innerHTML = '<p style="text-align:center; color:#888; width:100%; grid-column: 1 / -1;">아직 제출된 소감문이 없습니다. 첫 번째 소감을 남겨보세요! ✏️</p>';
         return;
       }
 
-      // 파스텔톤 포스트잇 배경색 (노랑, 핑크, 하늘, 연두, 주황, 보라)
-      const colors = ['#fff9db', '#ffe3e3', '#e7f5ff', '#d3f9d8', '#ffe8cc', '#f3d9fa'];
-
-      // 패들렛 형태 카드 그리드 레이아웃 설정
-      container.style.display = 'grid';
-      container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(220px, 1fr))';
-      container.style.gap = '16px';
-      container.style.padding = '12px 4px';
-
-      // 소감문 데이터 포스트잇 카드로 생성
-      data.forEach((item, index) => {
-        const card = document.createElement('div');
-        const randomColor = colors[index % colors.length];
-
-        // 다양한 필드명에 대응 (이름, 소감, 날짜 자동 인식)
-        const name = item.name || item.작성자 || item.학생이름 || item.이름 || '익명';
-        const content = item.content || item.소감 || item.소감문 || item.내용 || item.feedback || (typeof item === 'object' ? Object.values(item)[1] : '') || '';
-        const date = item.date || item.작성일 || item.날짜 || '';
-
-        // 포스트잇 카드 디자인
-        card.style.backgroundColor = randomColor;
-        card.style.padding = '18px';
-        card.style.borderRadius = '12px';
-        card.style.boxShadow = '2px 4px 10px rgba(0,0,0,0.08)';
-        card.style.display = 'flex';
-        card.style.flexDirection = 'column';
-        card.style.justifyContent = 'space-between';
-        card.style.transform = `rotate(${(index % 5 - 2) * 1.2}deg)`; // 살짝 기울어진 오프라인 포스트잇 느낌
-        card.style.transition = 'all 0.2s ease-in-out';
-        card.style.cursor = 'default';
-
-        // Hover 효과 (마우스 올리면 펴지면서 커짐)
-        card.onmouseover = () => {
-          card.style.transform = 'scale(1.04) rotate(0deg)';
-          card.style.boxShadow = '4px 8px 20px rgba(0,0,0,0.15)';
-          card.style.zIndex = '10';
-        };
-        card.onmouseout = () => {
-          card.style.transform = `rotate(${(index % 5 - 2) * 1.2}deg)`;
-          card.style.boxShadow = '2px 4px 10px rgba(0,0,0,0.08)';
-          card.style.zIndex = '1';
-        };
-
-        card.innerHTML = `
-          <div style="font-size: 15px; color: #2b2b2b; line-height: 1.5; word-break: break-all; white-space: pre-wrap; margin-bottom: 14px; font-family: sans-serif;">
-            ${content}
-          </div>
-          <div style="font-size: 13px; color: #555; font-weight: bold; text-align: right; border-top: 1px dashed rgba(0,0,0,0.12); padding-top: 8px; margin-top: auto;">
-            - ${name} ${date ? `<span style="font-size:11px; font-weight:normal; color:#777; margin-left:4px;">(${date})</span>` : ''}
-          </div>
-        `;
-
-        container.appendChild(card);
-      });
+      // 모둠 목록 추출 및 필터 드롭다운 옵션 생성
+      setupGroupFilterOptions(allFeedbacksData);
+      
+      // 화면에 카드 렌더링
+      renderFeedbackCards(allFeedbacksData);
     })
     .catch(err => {
       console.error('소감문 불러오기 오류:', err);
       container.innerHTML = '<p style="text-align:center; color:#e74c3c; width:100%; grid-column: 1 / -1;">❌ 데이터를 불러오는 중 오류가 발생했습니다.</p>';
     });
 }
+
+// 4. 모둠 드롭다운 메뉴 자동 생성
+function setupGroupFilterOptions(data) {
+  const select = document.getElementById('groupFilterSelect');
+  select.innerHTML = '<option value="all">전체 보기</option>';
+
+  const groups = new Set();
+  data.forEach(item => {
+    // 시트에서 가져온 모둠 정보 (group, 모둠, 반 등)
+    const grp = item.group || item.모둠 || item.class || '';
+    if (grp) groups.add(String(grp).trim());
+  });
+
+  // 모둠 목록 추가
+  Array.from(groups).sort().forEach(grp => {
+    const opt = document.createElement('option');
+    opt.value = grp;
+    opt.textContent = grp.includes('모둠') ? grp : `${grp}모둠`;
+    select.appendChild(opt);
+  });
+}
+
+// 5. 모둠 선택 시 필터링 함수
+function filterFeedbacks() {
+  const selectedGroup = document.getElementById('groupFilterSelect').value;
+  
+  if (selectedGroup === 'all') {
+    renderFeedbackCards(allFeedbacksData);
+  } else {
+    const filtered = allFeedbacksData.filter(item => {
+      const grp = String(item.group || item.모둠 || item.class || '').trim();
+      return grp === selectedGroup;
+    });
+    renderFeedbackCards(filtered);
+  }
+}
+
+// 6. 포스트잇 카드 그리기 함수
+function renderFeedbackCards(dataList) {
+  const container = document.getElementById('feedbackList');
+  container.innerHTML = '';
+
+  if (dataList.length === 0) {
+    container.innerHTML = '<p style="text-align:center; color:#888; width:100%; grid-column: 1 / -1;">해당 모둠의 소감문이 없습니다.</p>';
+    return;
+  }
+
+  // 파스텔톤 포스트잇 배경색
+  const colors = ['#fff9db', '#ffe3e3', '#e7f5ff', '#d3f9d8', '#ffe8cc', '#f3d9fa'];
+
+  container.style.display = 'grid';
+  container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(220px, 1fr))';
+  container.style.gap = '16px';
+  container.style.padding = '12px 4px';
+
+  dataList.forEach((item, index) => {
+    const card = document.createElement('div');
+    const randomColor = colors[index % colors.length];
+
+    // 필드 읽기
+    const name = item.name || item.작성자 || item.학생이름 || item.이름 || '익명';
+    const content = item.content || item.소감 || item.소감문 || item.내용 || '';
+    const group = item.group || item.모둠 || item.class || '';
+
+    // 포스트잇 카드 스타일
+    card.style.backgroundColor = randomColor;
+    card.style.padding = '18px';
+    card.style.borderRadius = '12px';
+    card.style.boxShadow = '2px 4px 10px rgba(0,0,0,0.08)';
+    card.style.display = 'flex';
+    card.style.flexDirection = 'column';
+    card.style.justifyContent = 'space-between';
+    card.style.transform = `rotate(${(index % 5 - 2) * 1.2}deg)`;
+    card.style.transition = 'all 0.2s ease-in-out';
+    card.style.cursor = 'default';
+
+    card.onmouseover = () => {
+      card.style.transform = 'scale(1.04) rotate(0deg)';
+      card.style.boxShadow = '4px 8px 20px rgba(0,0,0,0.15)';
+      card.style.zIndex = '10';
+    };
+    card.onmouseout = () => {
+      card.style.transform = `rotate(${(index % 5 - 2) * 1.2}deg)`;
+      card.style.boxShadow = '2px 4px 10px rgba(0,0,0,0.08)';
+      card.style.zIndex = '1';
+    };
+
+    // 💡 시간을 완전히 빼고 모둠 + 이름만 깔끔하게 표시!
+    const groupBadge = group ? `[${group}] ` : '';
+
+    card.innerHTML = `
+      <div style="font-size: 15px; color: #2b2b2b; line-height: 1.5; word-break: break-all; white-space: pre-wrap; margin-bottom: 14px; font-family: sans-serif;">
+        ${content}
+      </div>
+      <div style="font-size: 13px; color: #444; font-weight: bold; text-align: right; border-top: 1px dashed rgba(0,0,0,0.12); padding-top: 8px; margin-top: auto;">
+        - ${groupBadge}${name}
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+  }
 </script>
 </body>
 </html>
