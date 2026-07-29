@@ -945,28 +945,33 @@ function startJourney(personaId){
 
    const btnGroup = document.createElement('div');
     btnGroup.style.display = 'flex';
+    btnGroup.style.flexDirection = 'row';
     btnGroup.style.justifyContent = 'center';
-    btnGroup.style.gap = '10px';
+    btnGroup.style.alignItems = 'center';
+    btnGroup.style.gap = '15px';
     btnGroup.style.marginTop = '1.5rem';
+   btnGroup.style.width = '100%';
+btnGroup.style.display = 'flex';
+btnGroup.style.gap = '10px';
 
-    const backBtn = document.createElement('button');
-    backBtn.className = 'next-btn';
-    backBtn.textContent = '다른 인물의 여정 살펴보기';
-    backBtn.onclick = switchToPersonaView;
+const backBtn = document.createElement('button');
+backBtn.className = 'next-btn';
+backBtn.textContent = '다른 인물의 여정 살펴보기';
+backBtn.onclick = switchToPersonaView;
 
-    const dashboardBtn = document.createElement('a');
-    dashboardBtn.className = 'next-btn';
-    dashboardBtn.style.display = 'inline-flex';
-    dashboardBtn.style.alignItems = 'center';
-    dashboardBtn.style.justifyContent = 'center';
-    dashboardBtn.style.textDecoration = 'none';
-    dashboardBtn.textContent = '📊 소감문 대시보드';
-    dashboardBtn.href = 'https://docs.google.com/spreadsheets/d/1zFSIHfV8GaCXAuMVa4HBRMrYCXPgRB8qPoc0-qJ2ZIM/edit?usp=sharing';
-    dashboardBtn.target = '_blank';
+const dashboardBtn = document.createElement('a');
+dashboardBtn.className = 'next-btn';
+dashboardBtn.textContent = '소감문 대시보드';
+dashboardBtn.href = 'https://docs.google.com/spreadsheets/d/1zFSIHfV8GaCXAuMVa4HBRMrYCXPgRB8qPoc0-qJ2ZIM/edit?usp=sharing';
+dashboardBtn.target = '_blank';
+dashboardBtn.style.textDecoration = 'none';
+dashboardBtn.style.display = 'inline-flex';
+dashboardBtn.style.alignItems = 'center';
+dashboardBtn.style.justifyContent = 'center';
 
-    btnGroup.appendChild(backBtn);
-    btnGroup.appendChild(dashboardBtn);
-    app.appendChild(btnGroup);
+btnGroup.appendChild(backBtn);
+btnGroup.appendChild(dashboardBtn);
+app.appendChild(btnGroup);
   }
 }
 
