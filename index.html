@@ -990,7 +990,7 @@ const modalHtml = `
   <div id="dashboardModal" style="display:none; position:fixed; z-index:10000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
     <div style="background:#fff; margin:5% auto; padding:24px; border-radius:10px; width:90%; max-width:600px; max-height:80vh; overflow-y:auto; position:relative; box-sizing:border-box;">
       <span onclick="closeDashboard()" style="position:absolute; right:20px; top:15px; font-size:24px; font-weight:bold; cursor:pointer; color:#aaa;">&times;</span>
-      <h3 style="margin-top:0; color:#004f8b;">📊 제출된 소감문 대시보드</h3>
+      <h3 style="margin-top:0; color:#004f8b;">소감문 대시보드</h3>
       <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
       <div id="feedbackList"><p style="text-align:center; color:#888;">데이터를 불러오는 중입니다...</p></div>
     </div>
@@ -1009,38 +1009,89 @@ function closeDashboard() {
 }
 
 function loadFeedbacks() {
-  // ⚠️ 기존에 사용 중이신 구글 앱스 스크립트 웹앱 URL을 아래 따옴표 안에 넣어주세요!
-  const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZ6gQjsKZiXVnnv294lNzIZRb1lWKLAS3tbhdLstAVRheD-N6552CcoY5fB5fjneSm4w/exec";
+  const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZ6gQjsKZiXVnnv2941NzIZRb11WKLAS3tbhdLstAVRHeD-N6552CcoY5fB5fjneSm4w/exec";
   const container = document.getElementById('feedbackList');
 
+  if (!container) return;
+
   if (GOOGLE_APP_SCRIPT_URL.includes("여기에_구글")) {
-    container.innerHTML = '<p style="text-align:center; color:#e67e22;">⚠️ 스크립트에 구글 앱스 스크립트 URL을 입력해 주세요.</p>';
+    container.innerHTML = '<p style="text-align:center; color:#e67e22; width:100%;">⚠️ 스크립트에 구글 앱스 스크립트 URL을 입력해 주세요.</p>';
     return;
   }
+
+  // 로딩 메시지
+  container.innerHTML = '<p style="text-align:center; color:#888; width:100%; grid-column: 1 / -1;">⏳ 소감문을 불러오는 중입니다...</p>';
 
   fetch(GOOGLE_APP_SCRIPT_URL)
     .then(res => res.json())
     .then(data => {
       container.innerHTML = '';
+      
       if (!data || data.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#888;">아직 제출된 소감문이 없습니다.</p>';
+        container.innerHTML = '<p style="text-align:center; color:#888; width:100%; grid-column: 1 / -1;">아직 제출된 소감문이 없습니다. 첫 번째 소감을 남겨보세요! ✏️</p>';
         return;
       }
-      data.reverse().forEach(item => {
+
+      // 파스텔톤 포스트잇 배경색 (노랑, 핑크, 하늘, 연두, 주황, 보라)
+      const colors = ['#fff9db', '#ffe3e3', '#e7f5ff', '#d3f9d8', '#ffe8cc', '#f3d9fa'];
+
+      // 패들렛 형태 카드 그리드 레이아웃 설정
+      container.style.display = 'grid';
+      container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(220px, 1fr))';
+      container.style.gap = '16px';
+      container.style.padding = '12px 4px';
+
+      // 소감문 데이터 포스트잇 카드로 생성
+      data.forEach((item, index) => {
         const card = document.createElement('div');
-        card.style.cssText = "background:#f8f9fa; border:1px solid #e9ecef; border-left:4px solid #004f8b; padding:12px 16px; margin-bottom:12px; border-radius:4px; text-align:left;";
+        const randomColor = colors[index % colors.length];
+
+        // 다양한 필드명에 대응 (이름, 소감, 날짜 자동 인식)
+        const name = item.name || item.작성자 || item.학생이름 || item.이름 || '익명';
+        const content = item.content || item.소감 || item.소감문 || item.내용 || item.feedback || (typeof item === 'object' ? Object.values(item)[1] : '') || '';
+        const date = item.date || item.작성일 || item.날짜 || '';
+
+        // 포스트잇 카드 디자인
+        card.style.backgroundColor = randomColor;
+        card.style.padding = '18px';
+        card.style.borderRadius = '12px';
+        card.style.boxShadow = '2px 4px 10px rgba(0,0,0,0.08)';
+        card.style.display = 'flex';
+        card.style.flexDirection = 'column';
+        card.style.justifyContent = 'space-between';
+        card.style.transform = `rotate(${(index % 5 - 2) * 1.2}deg)`; // 살짝 기울어진 오프라인 포스트잇 느낌
+        card.style.transition = 'all 0.2s ease-in-out';
+        card.style.cursor = 'default';
+
+        // Hover 효과 (마우스 올리면 펴지면서 커짐)
+        card.onmouseover = () => {
+          card.style.transform = 'scale(1.04) rotate(0deg)';
+          card.style.boxShadow = '4px 8px 20px rgba(0,0,0,0.15)';
+          card.style.zIndex = '10';
+        };
+        card.onmouseout = () => {
+          card.style.transform = `rotate(${(index % 5 - 2) * 1.2}deg)`;
+          card.style.boxShadow = '2px 4px 10px rgba(0,0,0,0.08)';
+          card.style.zIndex = '1';
+        };
+
         card.innerHTML = `
-          <div style="font-size:14px; color:#004f8b; font-weight:bold; margin-bottom:6px;">
-            ${item.group || ''}모둠 ${item.number || ''}번 ${item.name || ''}
+          <div style="font-size: 15px; color: #2b2b2b; line-height: 1.5; word-break: break-all; white-space: pre-wrap; margin-bottom: 14px; font-family: sans-serif;">
+            ${content}
           </div>
-          <p style="margin:0; color:#333; font-size:14.5px; white-space:pre-wrap;">${item.feedback || item.content || ''}</p>
+          <div style="font-size: 13px; color: #555; font-weight: bold; text-align: right; border-top: 1px dashed rgba(0,0,0,0.12); padding-top: 8px; margin-top: auto;">
+            - ${name} ${date ? `<span style="font-size:11px; font-weight:normal; color:#777; margin-left:4px;">(${date})</span>` : ''}
+          </div>
         `;
+
         container.appendChild(card);
       });
     })
     .catch(err => {
-      container.innerHTML = '<p style="text-align:center; color:red;">소감문을 불러오는 데 실패했습니다.</p>';
+      console.error('소감문 불러오기 오류:', err);
+      container.innerHTML = '<p style="text-align:center; color:#e74c3c; width:100%; grid-column: 1 / -1;">❌ 데이터를 불러오는 중 오류가 발생했습니다.</p>';
     });
+}
 }
 </script>
 </body>
