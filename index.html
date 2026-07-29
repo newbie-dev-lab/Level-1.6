@@ -948,7 +948,7 @@ function startJourney(personaId){
     btnGroup.style.flexDirection = 'row';
     btnGroup.style.justifyContent = 'center';
     btnGroup.style.alignItems = 'center';
-    btnGroup.style.gap = '12px';
+    btnGroup.style.gap = '10px';
     btnGroup.style.marginTop = '1.5rem';
    btnGroup.style.width = '100%';
 btnGroup.style.display = 'flex';
@@ -960,7 +960,7 @@ backBtn.textContent = '다른 인물의 여정 살펴보기';
 backBtn.onclick = switchToPersonaView;
 const dashboardBtn = document.createElement('button');
     dashboardBtn.className = 'next-btn';
-    dashboardBtn.textContent = '📊 소감문 대시보드';
+    dashboardBtn.textContent = '소감문 대시보드';
     dashboardBtn.onclick = openDashboard;
     dashboardBtn.style.textDecoration = 'none';
     dashboardBtn.style.display = 'inline-flex';
@@ -1091,7 +1091,6 @@ function loadFeedbacks() {
       console.error('소감문 불러오기 오류:', err);
       container.innerHTML = '<p style="text-align:center; color:#e74c3c; width:100%; grid-column: 1 / -1;">❌ 데이터를 불러오는 중 오류가 발생했습니다.</p>';
     });
-}
 }
 </script>
 </body>
